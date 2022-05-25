@@ -24,10 +24,7 @@ const Dashboard = () => {
             setName(decoded.name);
             setExpire(decoded.exp);
         } catch (error) {
-            if (error.response) {
-                navigate("/login");
-            }
-        }
+            navigate("/login");
     }
 
     const axiosJWT = axios.create();
