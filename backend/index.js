@@ -13,8 +13,8 @@ try {
 } catch (error) {
     console.error(error);
 }
-
-app.use(cors({ credentials:true, origin:'http://localhost:3000' }));
+var origins = ['http://snorlaxx.ddns.net:3000', 'http://localhost:3000']
+app.use(cors({ credentials:true, origin: origins}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(router);
