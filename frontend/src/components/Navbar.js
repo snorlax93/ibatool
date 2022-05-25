@@ -7,7 +7,7 @@ const Navbar = () => {
 
     const Logout = async () => {
         try {
-            await axios.delete('http://localhost:8080/logout');
+            await axios.delete('http://snorlaxx-server.ddns.net:8080/logout');
             navigate("/login");
         } catch (error) {
             console.log(error);

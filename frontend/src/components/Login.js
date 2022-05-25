@@ -11,7 +11,7 @@ const Login = () => {
     const Auth = async (e) => {
         e.preventDefault();
         try {
-            const loginWithEmail = await axios.post('http://localhost:8080/login', {
+            const loginWithEmail = await axios.post('http://snorlaxx-server.ddns.net:8080/login', {
                 emailAddress: email,
                 password: password
             });

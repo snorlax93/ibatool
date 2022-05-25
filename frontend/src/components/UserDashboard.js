@@ -18,7 +18,7 @@ const Dashboard = () => {
 
     const refreshToken = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/token');
+            const response = await axios.get('http://snorlaxx-server.ddns.net:8080/token');
             setToken(response.data.accessToken);
             const decoded = jwt_decode(response.data.accessToken);
             setName(decoded.name);
@@ -35,7 +35,7 @@ const Dashboard = () => {
     axiosJWT.interceptors.request.use(async (config) => {
         const currentDate = new Date();
         if (expire * 1000 < currentDate.getTime()) {
-            const response = await axios.get('http://localhost:8080/token');
+            const response = await axios.get('http://snorlaxx-server.ddns.net:8080/token');
             config.headers.Authorization = `Bearer ${response.data.accessToken}`;
             setToken(response.data.accessToken);
             const decoded = jwt_decode(response.data.accessToken);
@@ -48,7 +48,7 @@ const Dashboard = () => {
     });
 
     const getUsers = async () => {
-        const response = await axiosJWT.get('http://localhost:8080/users', {
+        const response = await axiosJWT.get('http://snorlaxx-server.ddns.net:8080/users', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -57,7 +57,7 @@ const Dashboard = () => {
     }
 
     // const deleteUsers = async () => {
-    //     const response = await axios.delete('http://localhost:8080/users', {
+    //     const response = await axios.delete('http://snorlaxx-server.ddns.net:8080/users', {
     //         user: username
     //     })
     // }
@@ -65,7 +65,7 @@ const Dashboard = () => {
     // const Register = async (e) => {
     //     e.preventDefault();
     //     try {
-    //         await axios.post('http://localhost:8080/users', {
+    //         await axios.post('http://snorlaxx-server.ddns.net:8080/users', {
     //             user: username,
     //             emailAddress: email,
     //             password: password,

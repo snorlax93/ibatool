@@ -13,7 +13,7 @@ const Register = () => {
     const Register = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:8080/users', {
+            await axios.post('http://snorlaxx-server.ddns.net:8080/users', {
                 user: username,
                 emailAddress: email,
                 password: password,
