@@ -20,9 +20,7 @@ const Login = () => {
                 navigate("/user-dashboard");
             }
         } catch (error) {
-            if (error.response) {
-                setMsg(error.response.data.msg);
-            }
+            setMsg(error.response.data.msg);
         }
     }
 
