@@ -14,40 +14,25 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
+import EditIcon from "@mui/icons-material/Edit";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
 
-function createData(name, calories, fat, carbs, protein) {
-  return {
-    name,
-    calories,
-    fat,
-    carbs,
-    protein,
-  };
-}
-const rows = [
-  createData("Cupcake", 305, 3.7, 67, 4.3),
-  createData("Donut", 452, 25.0, 51, 4.9),
-  createData("Eclair", 262, 16.0, 24, 6.0),
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData("Gingerbread", 356, 16.0, 49, 3.9),
-  createData("Honeycomb", 408, 3.2, 87, 6.5),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData("Jelly Bean", 375, 0.0, 94, 0.0),
-  createData("KitKat", 518, 26.0, 65, 7.0),
-  createData("Lollipop", 392, 0.2, 98, 0.0),
-  createData("Marshmallow", 318, 0, 81, 2.0),
-  createData("Nougat", 360, 19.0, 9, 37.0),
-  createData("Oreo", 437, 18.0, 63, 4.0),
-];
+const getData = async () => {
+  const response = await fetch("http://localhost:8080/api/topics/all");
+  const data = await response.json();
+  return data;
+};
+
+const rows = await getData();
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -86,31 +71,25 @@ const headCells = [
     id: "name",
     numeric: false,
     disablePadding: true,
-    label: "Dessert (100g serving)",
+    label: "Proposed Name",
   },
   {
-    id: "calories",
-    numeric: true,
-    disablePadding: false,
-    label: "Calories",
+    id: "quickLink",
+    numeric: false,
+    disablePadding: true,
+    label: "Quick Link",
   },
   {
-    id: "fat",
+    id: "ranking",
     numeric: true,
     disablePadding: false,
-    label: "Fat (g)",
+    label: "Ranking",
   },
   {
-    id: "carbs",
-    numeric: true,
+    id: "uploader",
+    numeric: false,
     disablePadding: false,
-    label: "Carbs (g)",
-  },
-  {
-    id: "protein",
-    numeric: true,
-    disablePadding: false,
-    label: "Protein (g)",
+    label: "Uploader",
   },
 ];
 
@@ -177,7 +156,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
+  const { numSelected, isDialogOpen } = props;
 
   return (
     <Toolbar
@@ -206,16 +185,29 @@ function EnhancedTableToolbar(props) {
         <></>
       )}
 
-      {numSelected > 0 ? (
+      {numSelected > 1 && (
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton
+            onClick={() => {
+              // need to make a pop up asking to confirm delete of topics
+              console.log("delete clicked");
+            }}
+          >
             <DeleteIcon />
           </IconButton>
         </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
+      )}
+
+      {numSelected === 1 && (
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              // need to load the page for single edit
+              console.log("Edit clicked");
+              isDialogOpen(true);
+            }}
+          >
+            <EditIcon />
           </IconButton>
         </Tooltip>
       )}
@@ -234,6 +226,8 @@ const Topics = () => {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -297,92 +291,226 @@ const Topics = () => {
       ),
     [order, orderBy, page, rowsPerPage]
   );
+
+  const setthis = () => {
+    // push data to API
+    // if it's good close the dialog and continue
+    setIsDialogOpen(false);
+    // if it's bad, show an error and stay on page
+  };
+
   return (
     <>
       <main>
         <Container maxWidth="xl">
+          <Dialog onClose={setthis} open={isDialogOpen}>
+            <DialogTitle>Edit Topic</DialogTitle>
+            <Container component="main" maxWidth="xs">
+              <Box component="form" noValidate onSubmit={{}}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField
+                      autoComplete="given-name"
+                      name="topicName"
+                      required
+                      fullWidth
+                      id="topicName"
+                      label="Topic Name"
+                      defaultValue={
+                        visibleRows.find((o) => o.name === selected[0])?.name
+                      }
+                      autoFocus
+                      // need to setup onChange events to store all our data here so i can validate it in UI :D
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="quickLink"
+                      label="Quick Link"
+                      name="quickLink"
+                      autoComplete="quickLink"
+                      defaultValue={
+                        visibleRows.find((o) => o.name === selected[0])
+                          ?.quickLink
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="content"
+                      label="Content"
+                      name="content"
+                      autoComplete="content"
+                      multiline
+                      defaultValue={
+                        visibleRows.find((o) => o.name === selected[0])?.content
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="ranking"
+                      label="Ranking"
+                      name="ranking"
+                      autoComplete="ranking"
+                      defaultValue={
+                        visibleRows.find((o) => o.name === selected[0])?.ranking
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      name="uploader"
+                      label="Uploader"
+                      type="uploader"
+                      id="uploader"
+                      autoComplete="uploader"
+                      defaultValue={
+                        visibleRows.find((o) => o.name === selected[0])
+                          ?.uploader
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      name="veto"
+                      label="Veto"
+                      type="veto"
+                      id="veto"
+                      autoComplete="veto"
+                      defaultValue={
+                        visibleRows.find((o) => o.name === selected[0])?.veto
+                      }
+                    />
+                  </Grid>
+                </Grid>
+                <Button
+                  // type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={async () => {
+                    console.log("submitted the form");
+                    const response = await fetch(
+                      `http://localhost:8080/api/topics/edit/${
+                        visibleRows.find((o) => o.name === selected[0])?._id
+                      }`,
+                      {
+                        method: "PATCH",
+                        body: JSON.stringify({}),
+                      }
+                    );
+                    alert("Saving Changes");
+                  }}
+                >
+                  Submit Change
+                </Button>
+              </Box>
+            </Container>
+          </Dialog>
           <Grid container spacing={4} sx={{ mt: 3, ml: -2 }}>
             <Box sx={{ width: "100%" }}>
               {/* <Paper sx={{ width: "100%", mb: 2 }}> */}
-                <Button variant="text" href="add">
-                  Add New
-                </Button>
-                <EnhancedTableToolbar numSelected={selected.length} />
-                <TableContainer>
-                  <Table
-                    sx={{ minWidth: 750 }}
-                    aria-labelledby="tableTitle"
-                    size={dense ? "small" : "medium"}
-                  >
-                    <EnhancedTableHead
-                      numSelected={selected.length}
-                      order={order}
-                      orderBy={orderBy}
-                      onSelectAllClick={handleSelectAllClick}
-                      onRequestSort={handleRequestSort}
-                      rowCount={rows.length}
-                    />
-                    <TableBody>
-                      {visibleRows.map((row, index) => {
-                        const isItemSelected = isSelected(row.name);
-                        const labelId = `enhanced-table-checkbox-${index}`;
+              <Button variant="text" href="add">
+                Add New
+              </Button>
+              <EnhancedTableToolbar
+                numSelected={selected.length}
+                isDialogOpen={setIsDialogOpen}
+              />
+              <TableContainer>
+                <Table
+                  sx={{ minWidth: 750 }}
+                  aria-labelledby="tableTitle"
+                  size={dense ? "small" : "medium"}
+                >
+                  <EnhancedTableHead
+                    numSelected={selected.length}
+                    order={order}
+                    orderBy={orderBy}
+                    onSelectAllClick={handleSelectAllClick}
+                    onRequestSort={handleRequestSort}
+                    rowCount={rows.length}
+                  />
+                  <TableBody>
+                    {visibleRows.map((row, index) => {
+                      const isItemSelected = isSelected(row.name);
+                      const labelId = `enhanced-table-checkbox-${index}`;
 
-                        return (
-                          <TableRow
-                            hover
-                            onClick={(event) => handleClick(event, row.name)}
-                            role="checkbox"
-                            aria-checked={isItemSelected}
-                            tabIndex={-1}
-                            key={row.name}
-                            selected={isItemSelected}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <TableCell padding="checkbox">
-                              <Checkbox
-                                color="primary"
-                                checked={isItemSelected}
-                                inputProps={{
-                                  "aria-labelledby": labelId,
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell
-                              component="th"
-                              id={labelId}
-                              scope="row"
-                              padding="none"
-                            >
-                              {row.name}
-                            </TableCell>
-                            <TableCell align="right">{row.calories}</TableCell>
-                            <TableCell align="right">{row.fat}</TableCell>
-                            <TableCell align="right">{row.carbs}</TableCell>
-                            <TableCell align="right">{row.protein}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                      {emptyRows > 0 && (
+                      return (
                         <TableRow
-                          style={{
-                            height: (dense ? 33 : 53) * emptyRows,
-                          }}
+                          hover
+                          // onClick={(event) => handleClick(event, row.name)}
+                          role="checkbox"
+                          aria-checked={isItemSelected}
+                          tabIndex={-1}
+                          key={row.name}
+                          selected={isItemSelected}
+                          sx={{ cursor: "pointer" }}
                         >
-                          <TableCell colSpan={6} />
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              color="primary"
+                              checked={isItemSelected}
+                              inputProps={{
+                                "aria-labelledby": labelId,
+                              }}
+                              onClick={(event) => handleClick(event, row.name)}
+                            />
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            id={labelId}
+                            scope="row"
+                            padding="none"
+                          >
+                            {row.name}
+                          </TableCell>
+                          <TableCell align="right">
+                            <a
+                              href={row.quickLink}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {row.quickLink}
+                            </a>
+                          </TableCell>
+                          <TableCell align="right">{row.ranking}</TableCell>
+                          <TableCell align="right">{row.uploader}</TableCell>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 25]}
-                  component="div"
-                  count={rows.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
+                      );
+                    })}
+                    {emptyRows > 0 && (
+                      <TableRow
+                        style={{
+                          height: (dense ? 33 : 53) * emptyRows,
+                        }}
+                      >
+                        <TableCell colSpan={6} />
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
               {/* </Paper> */}
               <FormControlLabel
                 control={

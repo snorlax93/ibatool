@@ -300,7 +300,7 @@ const Episodes = () => {
   return (
     <>
       <main>
-        <Container maxWidth="xl">
+        <Container maxWidth="md">
           <Grid container spacing={4} sx={{ mt: 3, ml: -2 }}>
             <Box sx={{ width: "100%" }}>
               {/* <Paper sx={{ width: "100%", mb: 2 }}> */}

@@ -37,6 +37,7 @@
 // export default Layout;
 import { Outlet } from "react-router-dom";
 import Header from "../components/Header";
+import Container from "@mui/material/Container";
 
 const sections = [
   { title: "Home", url: "/" },
@@ -47,20 +48,21 @@ const sections = [
 
 const getTitle = () => {
   let title = window.location.href.split("/")[3].toUpperCase();
-  if (title === '') {
-    title = 'HOME'
+  if (title === "") {
+    title = "HOME";
   }
-  return title
-}
+  return title;
+};
 
 const Layout = () => {
   return (
     <>
-      <Header title={getTitle()} sections={sections} />
-      <Outlet />
+      <Container component="header" maxWidth="lg">
+        <Header title={getTitle()} sections={sections} />
+        <Outlet />
+      </Container>
     </>
   );
-
 };
 
 export default Layout;
