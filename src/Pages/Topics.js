@@ -28,6 +28,7 @@ import TextField from "@mui/material/TextField";
 
 const getData = async () => {
   const response = await fetch("http://localhost:8080/api/topics/all");
+  // const response = await fetch("http://192.168.4.47:8080/api/topics/all");
   const data = await response.json();
   return data;
 };
@@ -299,6 +300,40 @@ const Topics = () => {
     // if it's bad, show an error and stay on page
   };
 
+  const [topicName, setTopicName] = React.useState();
+  const [quickLink, setQuickLink] = React.useState();
+  const [content, setContent] = React.useState();
+  const [ranking, setRanking] = React.useState();
+  const [uploader, setUploader] = React.useState();
+  const [veto, setVeto] = React.useState();
+
+  const handleChange = (event) => {
+    console.log("LA: " + event.target.id);
+    console.log("LA: " + event.target.value);
+    switch (event.target.id) {
+      case "topicName":
+        setTopicName(event.target.value);
+        break;
+      case "quickLink":
+        setQuickLink(event.target.value);
+        break;
+      case "content":
+        setContent(event.target.value);
+        break;
+      case "ranking":
+        setRanking(event.target.value);
+        break;
+      case "uploader":
+        setUploader(event.target.value);
+        break;
+      case "veto":
+        setVeto(event.target.value);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <>
       <main>
@@ -316,10 +351,12 @@ const Topics = () => {
                       fullWidth
                       id="topicName"
                       label="Topic Name"
+                      value={topicName}
                       defaultValue={
                         visibleRows.find((o) => o.name === selected[0])?.name
                       }
                       autoFocus
+                      onChange={(event) => handleChange(event)}
                       // need to setup onChange events to store all our data here so i can validate it in UI :D
                     />
                   </Grid>
@@ -329,12 +366,14 @@ const Topics = () => {
                       fullWidth
                       id="quickLink"
                       label="Quick Link"
+                      value={quickLink}
                       name="quickLink"
                       autoComplete="quickLink"
                       defaultValue={
                         visibleRows.find((o) => o.name === selected[0])
                           ?.quickLink
                       }
+                      onChange={(event) => handleChange(event)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -343,12 +382,14 @@ const Topics = () => {
                       fullWidth
                       id="content"
                       label="Content"
+                      value={content}
                       name="content"
                       autoComplete="content"
                       multiline
                       defaultValue={
                         visibleRows.find((o) => o.name === selected[0])?.content
                       }
+                      onChange={(event) => handleChange(event)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -357,11 +398,13 @@ const Topics = () => {
                       fullWidth
                       id="ranking"
                       label="Ranking"
+                      value={ranking}
                       name="ranking"
                       autoComplete="ranking"
                       defaultValue={
                         visibleRows.find((o) => o.name === selected[0])?.ranking
                       }
+                      onChange={(event) => handleChange(event)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -370,6 +413,7 @@ const Topics = () => {
                       fullWidth
                       name="uploader"
                       label="Uploader"
+                      value={uploader}
                       type="uploader"
                       id="uploader"
                       autoComplete="uploader"
@@ -377,6 +421,7 @@ const Topics = () => {
                         visibleRows.find((o) => o.name === selected[0])
                           ?.uploader
                       }
+                      onChange={(event) => handleChange(event)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -385,12 +430,14 @@ const Topics = () => {
                       fullWidth
                       name="veto"
                       label="Veto"
+                      value={veto}
                       type="veto"
                       id="veto"
                       autoComplete="veto"
                       defaultValue={
                         visibleRows.find((o) => o.name === selected[0])?.veto
                       }
+                      onChange={(event) => handleChange(event)}
                     />
                   </Grid>
                 </Grid>
@@ -401,16 +448,41 @@ const Topics = () => {
                   sx={{ mt: 3, mb: 2 }}
                   onClick={async () => {
                     console.log("submitted the form");
-                    const response = await fetch(
-                      `http://localhost:8080/api/topics/edit/${
-                        visibleRows.find((o) => o.name === selected[0])?._id
-                      }`,
-                      {
-                        method: "PATCH",
-                        body: JSON.stringify({}),
+                    console.log("LA the formdata is {" + topicName);
+                    let dataobj = {
+                      name: topicName,
+                      quickLink: quickLink,
+                      content: content,
+                      ranking: ranking,
+                      uploader: uploader,
+                      veto: veto,
+                    };
+                    let data = {};
+                    for (const [key, value] of Object.entries(dataobj)) {
+                      if (value !== undefined) {
+                        data[key] = value;
                       }
-                    );
+                    }
                     alert("Saving Changes");
+                    try {
+                      const response = await fetch(
+                        `http://localhost:8080/api/topics/edit/${
+                          // `http://192.168.4.47:8080/api/topics/edit/${
+                          visibleRows.find((o) => o.name === selected[0])?._id
+                        }`,
+                        {
+                          method: "PATCH",
+                          body: JSON.stringify(data),
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                        }
+                      );
+                      let resp = response.json();
+                      console.log(resp);
+                    } catch (error) {
+                      console.log(error.message);
+                    }
                   }}
                 >
                   Submit Change
@@ -421,7 +493,10 @@ const Topics = () => {
           <Grid container spacing={4} sx={{ mt: 3, ml: -2 }}>
             <Box sx={{ width: "100%" }}>
               {/* <Paper sx={{ width: "100%", mb: 2 }}> */}
-              <Button variant="text" href="add">
+              <Button
+                variant="text"
+                onClick={() => console.log("add new clicked")}
+              >
                 Add New
               </Button>
               <EnhancedTableToolbar
